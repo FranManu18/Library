@@ -1,18 +1,51 @@
 const d=document;
 
-function Book (tittle,author,pages,read){
+class Book{
+  constructor(tittle,author,pages,read){
     this.id=crypto.randomUUID();
     this.tittle=tittle;
     this.author=author;
     this.pages=pages;
     this.read=read;
     this.info = `The ${this.tittle} by ${this.author}, ${this.pages} pages, ${this.read ? "read" : "not read yet"}`;
-};
+  }
+
+  changeRead(){
+    this.read=!this.read;
+  }
+}
 
 
+
+class Library{
+  constructor(){
+    this.books=[];
+  }
+  
+  add(book){
+    this.books.push(book);
+  }
+  
+  delete(index){
+    this.books.splice(index, 1);
+}
+
+
+  getBook(index){
+    if (this.books[index] != null){
+      return this.books[index];
+    }
+  }
+  
+  getBooks(){
+    return this.books;
+  }
+  
+}
 
 const spiderman= new Book('Spiderman','Stan lee','100',true);
-const library=[spiderman];
+const library=new Library;
+library.add(spiderman);
 
 function mostrarLibros(){
     const $table = d.querySelector(".books");
@@ -22,7 +55,7 @@ function mostrarLibros(){
     <th>Paginas</th>
     <th>Leido</th>`;
 
-    library.forEach((book,index)=>{
+    library.getBooks().forEach((book,index)=>{
         const booktr=d.createElement("tr");
         booktr.innerHTML=`
         <td>${book.tittle}</td>
@@ -41,7 +74,8 @@ function mostrarLibros(){
             let confirmation= confirm("¿Estas seguro que queres borrar ese libro?");
             if (confirmation){
                 const indexButton= button.getAttribute("data-index");
-                borrarLibro(indexButton)
+                library.delete(indexButton);
+                mostrarLibros();
             }
         })
     })
@@ -50,22 +84,13 @@ function mostrarLibros(){
     $readButton.forEach((button) => {
         button.addEventListener("click", () =>{
             const indexButton=button.getAttribute("data-index");
-            estadoLeido(indexButton);
+            library.getBook(indexButton).changeRead();
+            mostrarLibros();
         })
     })
 };
 mostrarLibros();
 
-function borrarLibro(index){
-    delete library[index];
-    mostrarLibros();
-}
-
-function estadoLeido(index){
-    const book=library[index];
-    book.read=!book.read;
-    mostrarLibros();
-}
 
 
 function agregarLibro(){
@@ -83,7 +108,7 @@ function agregarLibro(){
 
         const newBook = new Book(tittle, author, pages, read);
 
-        library.push(newBook);
+        library.add(newBook);
         $form.classList.add("hidden");
         $button.classList.remove("hidden");
         mostrarLibros();
